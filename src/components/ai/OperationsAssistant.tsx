@@ -6,6 +6,7 @@ type Message = {
   id: string
   role: "user" | "assistant"
   content: string
+  isError?: boolean
 }
 
 const SUGGESTED_PROMPTS = [
@@ -14,67 +15,6 @@ const SUGGESTED_PROMPTS = [
   "How can we reduce food waste?",
   "What should we prioritize next week?",
 ]
-
-const MOCK_RESPONSES: Record<string, string> = {
-  "Which neighborhood is performing best?":
-    `Based on current platform data, **East Village** is your top-performing neighborhood across all key metrics.
-
-**Revenue:** $3,540 in June — the highest of the three zones and growing 10.6% month-over-month. YTD contribution is approximately 46% of total platform revenue.
-
-**Subscribers:** 3 active customers (Maya Torres, James Okafor, Dana Reeves), with the highest proportion of Connoisseur-tier accounts. Weekly delivery cadence means revenue per customer is the highest on the platform.
-
-**Vendors:** Bien Cuit (★4.9) and Fleisher's Craft Butchery (★4.8) are your two highest-rated vendors — both located in East Village. This quality concentration gives the neighborhood a strong retention advantage.
-
-**Fulfillment:** 97% fulfillment rate and 94% on-time delivery — the best operational performance across all zones.
-
-**Recommendation:** East Village is ready for subscriber expansion. Adding a 4th vendor — a pantry or specialty goods partner — would support Connoisseur box differentiation without stressing current vendor capacity.`,
-
-  "Which vendor needs attention?":
-    `Two vendors warrant attention right now:
-
-**1. Astoria Seafood — Currently Inactive**
-This vendor has a strong ★4.8 rating and 22 historical orders, but is currently marked inactive. It's your only seafood option on the platform, and its absence directly reduces box quality for Astoria subscribers, particularly Finn Larsen (Connoisseur, weekly). Reactivation is the highest-impact single action available this week.
-
-**2. Phillips Farms Stand — Lowest Rating & Fulfillment**
-With a ★4.5 rating and a 94% fulfillment rate — the lowest on the platform — Phillips Farms Stand is underperforming relative to peers. The gap may reflect seasonal sourcing constraints or logistics friction with the Astoria zone.
-
-**Suggested action:** Prioritize Astoria Seafood reactivation this week. Schedule a performance review with Phillips Farms Stand within the next two weeks to surface root causes before subscriber satisfaction is affected.`,
-
-  "How can we reduce food waste?":
-    `Your platform already averages **4.2% food waste** — roughly 7x better than the ~30% traditional retail benchmark. However, there is meaningful room to improve, particularly in Astoria.
-
-**Current waste by neighborhood:**
-• East Village: 3.1% — on target
-• Bed-Stuy: 4.4% — watch zone
-• Astoria: 5.2% — needs action
-
-Astoria's higher rate likely reflects lower subscriber density (fewer boxes to absorb perishable inventory) combined with Astoria Seafood's inactive status creating gaps in box composition planning.
-
-**Three recommendations:**
-
-**1. Dynamic box sizing**
-Let customers set portion preferences at subscription setup. Reducing over-packing in Monthly-tier boxes — Explorer customers like Omar Khalil and Priya Nair typically order less frequently — could cut waste by 15–20% in Astoria.
-
-**2. Cross-neighborhood surplus redistribution**
-Excess produce from Phillips Farms Stand can be redistributed across Bed-Stuy boxes when Astoria volume is low. A simple inventory-sharing rule between zones would reduce last-mile surplus.
-
-**3. Demand signaling with vendors**
-Share weekly subscriber counts with vendors 48 hours before fulfillment so they can right-size their prep quantities. Bien Cuit and Crown Finish Caves are strong candidates for this pilot given their volume and ratings.`,
-
-  "What should we prioritize next week?":
-    `Based on current platform state, here are the top 3 priorities for next week:
-
-**1. Re-engage paused and cancelled subscribers**
-Simone Park (Regular, Astoria, Biweekly) has a paused subscription. Aisha Grant (Regular, Bed-Stuy, Biweekly) cancelled. Together they represent ~$130/month in recoverable MRR. A personalized outreach — with a one-box credit or a delivery skip option — is a high-ROI action given your strong vendor ratings and low churn history.
-
-**2. Reactivate Astoria Seafood**
-Your Astoria Connoisseur subscriber (Finn Larsen, weekly at $120) and Explorer subscriber (Omar Khalil, monthly at $35) currently receive boxes without a seafood component. Reactivating Astoria Seafood restores full box quality and reduces waste in that zone simultaneously.
-
-**3. Plan East Village vendor expansion**
-East Village is your highest-revenue zone with 10.6% month-over-month growth and a 97% fulfillment rate — it has capacity headroom. Identifying a pantry or specialty goods vendor would let you increase average box value for Connoisseur subscribers without stressing Bien Cuit or Fleisher's.
-
-**Estimated revenue impact if all three are executed:** +$340–$480/month.`,
-}
 
 function renderContent(text: string) {
   return text.split("\n").map((line, i) => {
@@ -110,26 +50,59 @@ function renderContent(text: string) {
 
 export function OperationsAssistant() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [isTyping, setIsTyping] = useState(false)
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const handlePrompt = (prompt: string) => {
-    if (isTyping) return
-    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: prompt }
+  const sendMessage = async (question: string) => {
+    const trimmed = question.trim()
+    if (!trimmed || isLoading) return
+
+    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: trimmed }
     setMessages((prev) => [...prev, userMsg])
-    setIsTyping(true)
+    setInput("")
+    setIsLoading(true)
 
-    setTimeout(() => {
-      const content = MOCK_RESPONSES[prompt] ?? "I don't have a response for that prompt yet."
-      const aiMsg: Message = { id: `a-${Date.now()}`, role: "assistant", content }
-      setMessages((prev) => [...prev, aiMsg])
-      setIsTyping(false)
-    }, 900)
+    try {
+      const res = await fetch("/api/ai-insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: trimmed }),
+      })
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        setMessages((prev) => [
+          ...prev,
+          { id: `e-${Date.now()}`, role: "assistant", content: data.error ?? "Something went wrong.", isError: true },
+        ])
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { id: `a-${Date.now()}`, role: "assistant", content: data.answer },
+        ])
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: `e-${Date.now()}`, role: "assistant", content: "Could not reach the AI service. Check your connection.", isError: true },
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage(input)
+    }
   }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages, isTyping])
+  }, [messages, isLoading])
 
   const isEmpty = messages.length === 0
 
@@ -141,8 +114,8 @@ export function OperationsAssistant() {
           <h1 className="text-base font-semibold text-zinc-900">Operations Assistant</h1>
           <p className="text-xs text-zinc-400 mt-0.5">Powered by your platform data</p>
         </div>
-        <span className="text-xs bg-zinc-100 text-zinc-400 px-2.5 py-1 rounded-full font-medium border border-zinc-200">
-          Claude API · Coming Soon
+        <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium border border-amber-200">
+          Claude API · Live
         </span>
       </div>
 
@@ -163,19 +136,23 @@ export function OperationsAssistant() {
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "assistant" && (
-              <div className="w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center mr-3 mt-0.5 shrink-0">
-                ✦
+              <div className={`w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center mr-3 mt-0.5 shrink-0 ${msg.isError ? "bg-red-400" : "bg-amber-500"}`}>
+                {msg.isError ? "!" : "✦"}
               </div>
             )}
             <div
               className={`max-w-2xl rounded-2xl px-4 py-3 ${
                 msg.role === "user"
                   ? "bg-amber-500 text-white text-sm font-medium ml-12"
+                  : msg.isError
+                  ? "bg-red-50 border border-red-100 shadow-sm"
                   : "bg-white border border-zinc-100 shadow-sm space-y-1"
               }`}
             >
               {msg.role === "user" ? (
                 <p className="text-sm">{msg.content}</p>
+              ) : msg.isError ? (
+                <p className="text-sm text-red-600">{msg.content}</p>
               ) : (
                 <div className="space-y-1">{renderContent(msg.content)}</div>
               )}
@@ -183,7 +160,7 @@ export function OperationsAssistant() {
           </div>
         ))}
 
-        {isTyping && (
+        {isLoading && (
           <div className="flex justify-start">
             <div className="w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center mr-3 mt-0.5 shrink-0">
               ✦
@@ -203,14 +180,14 @@ export function OperationsAssistant() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggested prompts */}
+      {/* Suggested prompts + input */}
       <div className="px-6 py-3 border-t border-zinc-100 bg-white shrink-0">
         <div className="flex flex-wrap gap-2 mb-3">
           {SUGGESTED_PROMPTS.map((prompt) => (
             <button
               key={prompt}
-              onClick={() => handlePrompt(prompt)}
-              disabled={isTyping}
+              onClick={() => sendMessage(prompt)}
+              disabled={isLoading}
               className="text-xs bg-zinc-50 hover:bg-amber-50 border border-zinc-200 hover:border-amber-300 text-zinc-600 hover:text-amber-700 px-3 py-1.5 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {prompt}
@@ -218,19 +195,23 @@ export function OperationsAssistant() {
           ))}
         </div>
 
-        {/* Input bar */}
-        <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5">
+        <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 focus-within:border-amber-300 focus-within:bg-white transition-colors">
           <input
+            ref={inputRef}
             type="text"
-            disabled
-            placeholder="Claude API integration coming soon…"
-            className="flex-1 bg-transparent text-sm text-zinc-400 placeholder:text-zinc-300 outline-none cursor-not-allowed"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+            placeholder="Ask about vendors, revenue, fulfillment, food waste…"
+            className="flex-1 bg-transparent text-sm text-zinc-700 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
           />
           <button
-            disabled
-            className="text-xs bg-zinc-200 text-zinc-400 px-3 py-1.5 rounded-lg font-medium cursor-not-allowed"
+            onClick={() => sendMessage(input)}
+            disabled={isLoading || !input.trim()}
+            className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Send
+            {isLoading ? "…" : "Send"}
           </button>
         </div>
       </div>
