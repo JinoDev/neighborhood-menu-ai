@@ -1,4 +1,4 @@
-import type { SubscriptionTier } from "@/types"
+import type { Subscription, SubscriptionTier } from "@/types"
 
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)
@@ -14,6 +14,43 @@ export function tierColor(tier: SubscriptionTier): string {
     regular: "bg-blue-100 text-blue-800",
     connoisseur: "bg-purple-100 text-purple-800",
   }[tier]
+}
+
+// The mock platform's data only covers Jan–Jun 2024, so renewal dates are
+// projected forward from this date rather than the real-world current date.
+export const MOCK_TODAY = new Date("2024-06-30")
+
+const FREQUENCY_TO_MONTHLY: Record<Subscription["frequency"], number> = {
+  weekly: 52 / 12,
+  biweekly: 26 / 12,
+  monthly: 1,
+}
+
+export function monthlyValue(sub: Subscription): number {
+  return sub.price * FREQUENCY_TO_MONTHLY[sub.frequency]
+}
+
+const FREQUENCY_TO_DAYS: Record<Subscription["frequency"], number> = {
+  weekly: 7,
+  biweekly: 14,
+  monthly: 30,
+}
+
+export function nextRenewalDate(sub: Subscription, asOf: Date = MOCK_TODAY): string {
+  const intervalMs = FREQUENCY_TO_DAYS[sub.frequency] * 24 * 60 * 60 * 1000
+  let next = new Date(sub.started_at)
+  while (next.getTime() <= asOf.getTime()) {
+    next = new Date(next.getTime() + intervalMs)
+  }
+  return next.toISOString().slice(0, 10)
+}
+
+export function subscriptionStatusColor(status: Subscription["status"]): string {
+  return {
+    active: "bg-emerald-100 text-emerald-700",
+    paused: "bg-yellow-100 text-yellow-700",
+    cancelled: "bg-zinc-100 text-zinc-500",
+  }[status]
 }
 
 export function categoryColor(category: string): string {
