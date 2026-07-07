@@ -4,6 +4,7 @@ import { useState } from "react"
 import type { Customer, Neighborhood, Subscription } from "@/types"
 import type { SubscriptionPlan } from "@/data/mock"
 import { Badge } from "@/components/ui/Badge"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { KPICard } from "@/components/ui/KPICard"
 import { MRRTrendChart } from "@/components/subscriptions/MRRTrendChart"
 import {
@@ -198,58 +199,58 @@ export function SubscriptionsView({ subscriptions, customers, neighborhoods, pla
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-              <th className="px-5 py-3 text-left">Customer</th>
-              <th className="px-5 py-3 text-left">Neighborhood</th>
-              <th className="px-5 py-3 text-left">Plan</th>
-              <th className="px-5 py-3 text-left">Frequency</th>
-              <th className="px-5 py-3 text-right">Price</th>
-              <th className="px-5 py-3 text-left">Status</th>
-              <th className="px-5 py-3 text-left">Started</th>
-              <th className="px-5 py-3 text-left">Renews</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-50">
-            {filtered.map((sub) => {
-              const customer = customerMap[sub.customer_id]
-              const neighborhood = customer ? neighborhoodMap[customer.neighborhood_id] : undefined
-              return (
-                <tr key={sub.id} className="hover:bg-zinc-50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
-                        {customer?.name.charAt(0) ?? "?"}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[820px] text-sm">
+            <thead>
+              <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <th className="px-5 py-3 text-left">Customer</th>
+                <th className="px-5 py-3 text-left">Neighborhood</th>
+                <th className="px-5 py-3 text-left">Plan</th>
+                <th className="px-5 py-3 text-left">Frequency</th>
+                <th className="px-5 py-3 text-right">Price</th>
+                <th className="px-5 py-3 text-left">Status</th>
+                <th className="px-5 py-3 text-left">Started</th>
+                <th className="px-5 py-3 text-left">Renews</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+              {filtered.map((sub) => {
+                const customer = customerMap[sub.customer_id]
+                const neighborhood = customer ? neighborhoodMap[customer.neighborhood_id] : undefined
+                return (
+                  <tr key={sub.id} className="hover:bg-zinc-50 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
+                          {customer?.name.charAt(0) ?? "?"}
+                        </div>
+                        <span className="font-medium text-zinc-900">{customer?.name ?? "Unknown"}</span>
                       </div>
-                      <span className="font-medium text-zinc-900">{customer?.name ?? "Unknown"}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-500">{neighborhood?.name ?? "—"}</td>
-                  <td className="px-5 py-3.5">
-                    <Badge label={tierLabel(sub.tier)} className={tierColor(sub.tier)} />
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-500 capitalize">{sub.frequency}</td>
-                  <td className="px-5 py-3.5 text-right text-zinc-700 font-medium">
-                    {formatCurrency(sub.price)}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <Badge label={sub.status} className={subscriptionStatusColor(sub.status)} />
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-400 text-xs">{sub.started_at}</td>
-                  <td className="px-5 py-3.5 text-zinc-500 text-xs">
-                    {sub.status === "cancelled" ? "—" : sub.status === "paused" ? "Paused" : nextRenewalDate(sub)}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-500">{neighborhood?.name ?? "—"}</td>
+                    <td className="px-5 py-3.5">
+                      <Badge label={tierLabel(sub.tier)} className={tierColor(sub.tier)} />
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-500 capitalize">{sub.frequency}</td>
+                    <td className="px-5 py-3.5 text-right text-zinc-700 font-medium">
+                      {formatCurrency(sub.price)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <Badge label={sub.status} className={subscriptionStatusColor(sub.status)} />
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-400 text-xs">{sub.started_at}</td>
+                    <td className="px-5 py-3.5 text-zinc-500 text-xs">
+                      {sub.status === "cancelled" ? "—" : sub.status === "paused" ? "Paused" : nextRenewalDate(sub)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
 
         {filtered.length === 0 && (
-          <div className="py-16 text-center text-zinc-400 text-sm">
-            No subscriptions match the current filters.
-          </div>
+          <EmptyState title="No subscriptions found" message="No subscriptions match the current filters. Try adjusting or clearing them." />
         )}
       </div>
     </div>

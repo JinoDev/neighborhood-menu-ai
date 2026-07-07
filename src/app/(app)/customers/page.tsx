@@ -9,8 +9,8 @@ export default function CustomersPage() {
   }, {})
 
   return (
-    <div className="px-8 py-8">
-      <div className="mb-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <div className="mb-8">
         <h1 className="text-2xl font-bold text-zinc-900">Customers</h1>
         <p className="text-sm text-zinc-500 mt-1">
           {activeCount} active · {tierCounts.explorer ?? 0} Explorer · {tierCounts.regular ?? 0} Regular · {tierCounts.connoisseur ?? 0} Connoisseur

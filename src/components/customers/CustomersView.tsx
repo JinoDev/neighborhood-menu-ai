@@ -3,6 +3,7 @@
 import { useState } from "react"
 import type { Customer, Neighborhood, Subscription } from "@/types"
 import { Badge } from "@/components/ui/Badge"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { tierColor, tierLabel } from "@/lib/utils"
 
 type Props = {
@@ -65,66 +66,66 @@ export function CustomersView({ customers, neighborhoods, subscriptions }: Props
       </div>
 
       <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-              <th className="px-5 py-3 text-left">Name</th>
-              <th className="px-5 py-3 text-left">Email</th>
-              <th className="px-5 py-3 text-left">Neighborhood</th>
-              <th className="px-5 py-3 text-left">Tier</th>
-              <th className="px-5 py-3 text-left">Frequency</th>
-              <th className="px-5 py-3 text-left">Sub Status</th>
-              <th className="px-5 py-3 text-left">Joined</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-50">
-            {filtered.map((customer) => {
-              const sub = subMap[customer.id]
-              return (
-                <tr key={customer.id} className="hover:bg-zinc-50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
-                        {customer.name.charAt(0)}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead>
+              <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <th className="px-5 py-3 text-left">Name</th>
+                <th className="px-5 py-3 text-left">Email</th>
+                <th className="px-5 py-3 text-left">Neighborhood</th>
+                <th className="px-5 py-3 text-left">Tier</th>
+                <th className="px-5 py-3 text-left">Frequency</th>
+                <th className="px-5 py-3 text-left">Sub Status</th>
+                <th className="px-5 py-3 text-left">Joined</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+              {filtered.map((customer) => {
+                const sub = subMap[customer.id]
+                return (
+                  <tr key={customer.id} className="hover:bg-zinc-50 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">
+                          {customer.name.charAt(0)}
+                        </div>
+                        <span className="font-medium text-zinc-900">{customer.name}</span>
                       </div>
-                      <span className="font-medium text-zinc-900">{customer.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-400 text-xs">{customer.email}</td>
-                  <td className="px-5 py-3.5 text-zinc-500">
-                    {neighborhoodMap[customer.neighborhood_id]?.name ?? "—"}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <Badge label={tierLabel(customer.subscription_tier)} className={tierColor(customer.subscription_tier)} />
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-500 capitalize">{sub?.frequency ?? "—"}</td>
-                  <td className="px-5 py-3.5">
-                    {sub ? (
-                      <Badge
-                        label={sub.status}
-                        className={
-                          sub.status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : sub.status === "paused"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-zinc-100 text-zinc-500"
-                        }
-                      />
-                    ) : (
-                      <span className="text-zinc-300 text-xs">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-zinc-400 text-xs">{customer.joined_at}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-400 text-xs">{customer.email}</td>
+                    <td className="px-5 py-3.5 text-zinc-500">
+                      {neighborhoodMap[customer.neighborhood_id]?.name ?? "—"}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <Badge label={tierLabel(customer.subscription_tier)} className={tierColor(customer.subscription_tier)} />
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-500 capitalize">{sub?.frequency ?? "—"}</td>
+                    <td className="px-5 py-3.5">
+                      {sub ? (
+                        <Badge
+                          label={sub.status}
+                          className={
+                            sub.status === "active"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : sub.status === "paused"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-zinc-100 text-zinc-500"
+                          }
+                        />
+                      ) : (
+                        <span className="text-zinc-300 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-400 text-xs">{customer.joined_at}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
 
         {filtered.length === 0 && (
-          <div className="py-16 text-center text-zinc-400 text-sm">
-            No customers match the current filters.
-          </div>
+          <EmptyState title="No customers found" message="No customers match the current filters. Try adjusting or clearing them." />
         )}
       </div>
     </div>

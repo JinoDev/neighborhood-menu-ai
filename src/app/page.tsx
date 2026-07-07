@@ -1,98 +1,136 @@
 import Link from "next/link"
+import Image from "next/image"
 
-const features = [
-  {
-    title: "Vendor Network",
-    description: "Connect hyper-local NYC vendors — bakeries, butchers, cheese caves, and produce farms — into curated neighborhood zones.",
-  },
-  {
-    title: "Subscription Tiers",
-    description: "Explorer, Regular, and Connoisseur tiers with weekly, biweekly, and monthly delivery cadences tailored to each neighborhood.",
-  },
-  {
-    title: "Operations Analytics",
-    description: "Real-time KPIs across neighborhoods — revenue, retention, box ratings, and vendor performance in one dashboard.",
-  },
-  {
-    title: "AI Insights",
-    description: "Claude-powered Q&A over live platform data: demand forecasting, vendor recommendations, and subscriber churn signals.",
-  },
+function VendorIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l1.5-5h15L21 9" />
+      <path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0" />
+      <path d="M5 9v10h14V9" />
+      <path d="M9 19v-6h6v6" />
+    </svg>
+  )
+}
+
+function TiersIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
+    </svg>
+  )
+}
+
+function AnalyticsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="20" x2="4" y2="12" />
+      <line x1="10" y1="20" x2="10" y2="6" />
+      <line x1="16" y1="20" x2="16" y2="14" />
+      <line x1="20" y1="20" x2="4" y2="20" />
+    </svg>
+  )
+}
+
+const highlights = [
+  { label: "Vendor Network", icon: <VendorIcon /> },
+  { label: "Subscription Tiers", icon: <TiersIcon /> },
+  { label: "Operations Analytics", icon: <AnalyticsIcon /> },
+  { label: "AI Insights", icon: <span className="text-[13px] leading-none">✦</span> },
 ]
-
-const stack = ["Next.js 16", "TypeScript", "Tailwind CSS", "Supabase", "Claude API"]
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-zinc-800 max-w-6xl mx-auto w-full">
-        <div>
-          <span className="text-amber-400 text-xs font-semibold uppercase tracking-widest">Neighborhood</span>
-          <span className="text-white font-bold text-base ml-1.5">Tasting Menu AI</span>
+    <div className="h-dvh overflow-hidden flex flex-col bg-white text-zinc-900">
+      <nav className="shrink-0 border-b border-zinc-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 pt-5 pb-2.5 max-w-7xl mx-auto w-full">
+          <Link href="/" className="min-w-0 hover:opacity-80 transition-opacity">
+            <span className="text-amber-600 text-xs font-semibold uppercase tracking-widest">Neighborhood</span>
+            <span className="text-zinc-900 font-bold text-base ml-1.5">Tasting Menu AI</span>
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors shrink-0 inline-flex items-center gap-1"
+          >
+            Dashboard <span aria-hidden="true">→</span>
+          </Link>
         </div>
-        <Link
-          href="/dashboard"
-          className="bg-amber-500 hover:bg-amber-400 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-        >
-          Open Dashboard
-        </Link>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-8">
-        <div className="pt-24 pb-16 text-center">
-          <div className="inline-flex items-center gap-2 bg-zinc-800 border border-zinc-700 text-amber-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
-            Portfolio Project · Systems Analysis &amp; Design · NYC
-          </div>
-          <h1 className="text-5xl font-bold leading-tight tracking-tight mb-6">
-            Hyper-local food subscriptions,
-            <br />
-            <span className="text-amber-400">powered by AI</span>
-          </h1>
-          <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            A full-stack platform connecting NYC neighborhoods to local vendors through curated
-            tasting menu subscriptions — with real-time analytics and AI-driven insights.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="bg-amber-500 hover:bg-amber-400 text-white font-semibold px-7 py-3 rounded-xl transition-colors text-sm inline-block"
-            >
-              View Dashboard
-            </Link>
-            <Link
-              href="/vendors"
-              className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-semibold px-7 py-3 rounded-xl transition-colors text-sm inline-block"
-            >
-              Browse Vendors
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-16">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-colors"
-            >
-              <h3 className="text-sm font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
+      {/* Hero */}
+      <main className="relative flex-1 min-h-0 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10"
+          style={{
+            background: "radial-gradient(45% 60% at 15% 30%, rgba(245,158,11,0.08), transparent 70%)",
+          }}
+        />
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col lg:flex-row items-center gap-7 lg:gap-12">
+          {/* Copy */}
+          <div className="w-full lg:w-[42%] shrink-0 flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              For local food subscription businesses
             </div>
-          ))}
-        </div>
-
-        <div className="border-t border-zinc-800 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-zinc-600">Built for target roles: Solutions Engineer · Technical Consultant · Systems Analyst</p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {stack.map((tech) => (
-              <span
-                key={tech}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-medium px-3 py-1 rounded-full"
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.12] mb-4 text-zinc-900">
+              Local food subscriptions,
+              <br />
+              <span className="text-amber-500">streamlined by AI</span>
+            </h1>
+            <p className="text-base sm:text-lg text-zinc-500 max-w-md mb-6 leading-relaxed">
+              Connect vendors and subscribers, track performance by neighborhood, and get AI-driven insights — all in one dashboard.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-7">
+              <Link
+                href="/dashboard"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
               >
-                {tech}
-              </span>
-            ))}
+                View Dashboard
+              </Link>
+              <Link
+                href="/vendors"
+                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors inline-flex items-center gap-1"
+              >
+                Explore vendors <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {highlights.map((h) => (
+                <span
+                  key={h.label}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 bg-zinc-50 border border-zinc-100 rounded-full px-2.5 py-1"
+                >
+                  <span className="text-amber-500">{h.icon}</span>
+                  {h.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Hero image */}
+          <div className="w-full flex-1 min-h-[160px] lg:min-h-0 lg:h-full flex items-center justify-center">
+            <div className="relative w-full h-[68%] min-h-[110px] rounded-2xl overflow-hidden border border-zinc-200 shadow-xl shadow-zinc-200/60">
+              <Image
+                src="https://images.unsplash.com/photo-1643944471768-2d2eac3afb6d?w=1920&q=80&fm=jpg&fit=crop"
+                alt="Fresh pastries and croissants displayed in a neighborhood bakery case"
+                fill
+                priority
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      <footer className="shrink-0 border-t border-zinc-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
+          <p className="text-xs text-zinc-400">© 2026 Neighborhood Tasting Menu AI</p>
+          <p className="text-xs text-zinc-400">NYC · Hyper-local food subscriptions</p>
+        </div>
+      </footer>
     </div>
   )
 }

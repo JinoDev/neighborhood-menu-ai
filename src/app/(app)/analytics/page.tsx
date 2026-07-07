@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
   const ytdRevenue = monthlyRevenue.reduce((s, m) => s + m.total, 0)
 
   return (
-    <div className="px-8 py-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-zinc-900">Analytics</h1>
         <p className="text-sm text-zinc-500 mt-1">Business operations overview · Jan – Jun 2024</p>
@@ -87,40 +87,42 @@ export default function AnalyticsPage() {
           <h2 className="text-sm font-semibold text-zinc-900">Fulfillment Metrics by Neighborhood</h2>
           <p className="text-xs text-zinc-400 mt-0.5">Operational health across delivery zones</p>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-              <th className="px-5 py-3 text-left">Neighborhood</th>
-              <th className="px-5 py-3 text-right">Fulfillment Rate</th>
-              <th className="px-5 py-3 text-right">On-Time Rate</th>
-              <th className="px-5 py-3 text-right">Food Waste</th>
-              <th className="px-5 py-3 text-right">Avg Items / Box</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-50">
-            {fulfillmentMetrics.map((row) => (
-              <tr key={row.neighborhood} className="hover:bg-zinc-50 transition-colors">
-                <td className="px-5 py-3.5 font-medium text-zinc-900">{row.neighborhood}</td>
-                <td className="px-5 py-3.5 text-right">
-                  <span className={`font-medium ${row.fulfillmentRate >= 96 ? "text-emerald-600" : row.fulfillmentRate >= 93 ? "text-amber-600" : "text-red-500"}`}>
-                    {row.fulfillmentRate}%
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-right">
-                  <span className={`font-medium ${row.onTimeRate >= 93 ? "text-emerald-600" : row.onTimeRate >= 90 ? "text-amber-600" : "text-red-500"}`}>
-                    {row.onTimeRate}%
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-right">
-                  <span className={`font-medium ${row.wastePercent <= 3.5 ? "text-emerald-600" : row.wastePercent <= 4.5 ? "text-amber-600" : "text-red-500"}`}>
-                    {row.wastePercent}%
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-right text-zinc-700">{row.avgItemsPerBox}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px] text-sm">
+            <thead>
+              <tr className="bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <th className="px-5 py-3 text-left">Neighborhood</th>
+                <th className="px-5 py-3 text-right">Fulfillment Rate</th>
+                <th className="px-5 py-3 text-right">On-Time Rate</th>
+                <th className="px-5 py-3 text-right">Food Waste</th>
+                <th className="px-5 py-3 text-right">Avg Items / Box</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+              {fulfillmentMetrics.map((row) => (
+                <tr key={row.neighborhood} className="hover:bg-zinc-50 transition-colors">
+                  <td className="px-5 py-3.5 font-medium text-zinc-900">{row.neighborhood}</td>
+                  <td className="px-5 py-3.5 text-right">
+                    <span className={`font-medium ${row.fulfillmentRate >= 96 ? "text-emerald-600" : row.fulfillmentRate >= 93 ? "text-amber-600" : "text-red-500"}`}>
+                      {row.fulfillmentRate}%
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <span className={`font-medium ${row.onTimeRate >= 93 ? "text-emerald-600" : row.onTimeRate >= 90 ? "text-amber-600" : "text-red-500"}`}>
+                      {row.onTimeRate}%
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <span className={`font-medium ${row.wastePercent <= 3.5 ? "text-emerald-600" : row.wastePercent <= 4.5 ? "text-amber-600" : "text-red-500"}`}>
+                      {row.wastePercent}%
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right text-zinc-700">{row.avgItemsPerBox}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         <div className="px-5 py-3 bg-zinc-50 border-t border-zinc-100">
           <p className="text-xs text-zinc-400">

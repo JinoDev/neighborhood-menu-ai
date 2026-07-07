@@ -143,18 +143,18 @@ export function OperationsAssistant() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-zinc-200 bg-white flex items-center justify-between shrink-0">
-        <div>
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 bg-white flex items-center justify-between gap-3 shrink-0">
+        <div className="min-w-0">
           <h1 className="text-base font-semibold text-zinc-900">Operations Assistant</h1>
           <p className="text-xs text-zinc-400 mt-0.5">Powered by your platform data</p>
         </div>
-        <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium border border-amber-200">
+        <span className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium border border-amber-200 shrink-0">
           Claude API · Live
         </span>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
         {isEmpty && (
           <div className="flex flex-col items-center justify-center h-full text-center pb-24">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
@@ -175,9 +175,9 @@ export function OperationsAssistant() {
               </div>
             )}
             <div
-              className={`max-w-2xl rounded-2xl px-4 py-3 ${
+              className={`max-w-[85%] sm:max-w-2xl rounded-2xl px-4 py-3 ${
                 msg.role === "user"
-                  ? "bg-amber-500 text-white text-sm font-medium ml-12"
+                  ? "bg-amber-500 text-white text-sm font-medium ml-6 sm:ml-12"
                   : msg.isError
                   ? "bg-red-50 border border-red-100 shadow-sm"
                   : "bg-white border border-zinc-100 shadow-sm space-y-1"
@@ -215,7 +215,7 @@ export function OperationsAssistant() {
       </div>
 
       {/* Suggested prompts + input */}
-      <div className="px-6 py-3 border-t border-zinc-100 bg-white shrink-0">
+      <div className="px-4 sm:px-6 py-3 border-t border-zinc-100 bg-white shrink-0">
         <div className="flex flex-wrap gap-2 mb-3">
           {SUGGESTED_PROMPTS.map((prompt) => (
             <button

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import type { Vendor, Neighborhood } from "@/types"
 import { Badge } from "@/components/ui/Badge"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { categoryColor } from "@/lib/utils"
 
 type Props = {
@@ -92,8 +93,8 @@ export function VendorsView({ vendors, neighborhoods }: Props) {
         ))}
 
         {filtered.length === 0 && (
-          <div className="col-span-3 py-16 text-center text-zinc-400 text-sm">
-            No vendors match the current filters.
+          <div className="col-span-full">
+            <EmptyState title="No vendors found" message="No vendors match the current filters. Try adjusting or clearing them." />
           </div>
         )}
       </div>
