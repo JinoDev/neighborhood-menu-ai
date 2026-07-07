@@ -21,10 +21,6 @@ export default function AnalyticsPage() {
   const prevRevenue = monthlyRevenue[monthlyRevenue.length - 2]
   const revenueGrowth = (((latestRevenue.total - prevRevenue.total) / prevRevenue.total) * 100).toFixed(1)
 
-  const latestSubs = subscriptionGrowth[subscriptionGrowth.length - 1]
-  const prevSubs = subscriptionGrowth[subscriptionGrowth.length - 2]
-  const subGrowth = (((latestSubs.total - prevSubs.total) / prevSubs.total) * 100).toFixed(1)
-
   const avgFulfillment = (fulfillmentMetrics.reduce((s, m) => s + m.fulfillmentRate, 0) / fulfillmentMetrics.length).toFixed(1)
   const avgWaste = (fulfillmentMetrics.reduce((s, m) => s + m.wastePercent, 0) / fulfillmentMetrics.length).toFixed(1)
 

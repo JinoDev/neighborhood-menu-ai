@@ -3,7 +3,7 @@
 import { useState } from "react"
 import type { Vendor, Neighborhood } from "@/types"
 import { Badge } from "@/components/ui/Badge"
-import { categoryColor, tierColor } from "@/lib/utils"
+import { categoryColor } from "@/lib/utils"
 
 type Props = {
   vendors: Vendor[]

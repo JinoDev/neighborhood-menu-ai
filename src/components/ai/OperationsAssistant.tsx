@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 type Message = {
   id: string
@@ -10,42 +12,71 @@ type Message = {
 }
 
 const SUGGESTED_PROMPTS = [
-  "Which neighborhood is performing best?",
-  "Which vendor needs attention?",
-  "How can we reduce food waste?",
-  "What should we prioritize next week?",
+  "Which neighborhood is underperforming?",
+  "Which vendors should we feature next month?",
+  "Summarize this week's KPIs.",
+  "Recommend ways to reduce food waste.",
+  "Which subscriptions are most at risk of churn?",
 ]
 
+// Maps markdown elements to the app's existing typographic scale so AI
+// responses look native to the dashboard instead of like raw markdown.
+const markdownComponents = {
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="text-sm font-bold text-zinc-900 mt-3 first:mt-0">{children}</h3>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="text-sm font-bold text-zinc-900 mt-3 first:mt-0">{children}</h3>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <h4 className="text-sm font-semibold text-zinc-900 mt-2 first:mt-0">{children}</h4>
+  ),
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="text-zinc-600 text-sm leading-relaxed">{children}</p>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-zinc-900">{children}</strong>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc marker:text-amber-500 pl-4 space-y-1 text-zinc-600 text-sm leading-relaxed">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal marker:text-amber-500 pl-4 space-y-1 text-zinc-600 text-sm leading-relaxed">
+      {children}
+    </ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+  a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+    <a href={href} target="_blank" rel="noreferrer" className="text-amber-600 underline hover:text-amber-700">
+      {children}
+    </a>
+  ),
+  code: ({ children }: { children?: React.ReactNode }) => (
+    <code className="bg-zinc-100 text-zinc-700 rounded px-1 py-0.5 text-xs font-mono">{children}</code>
+  ),
+  table: ({ children }: { children?: React.ReactNode }) => (
+    <div className="overflow-x-auto rounded-lg border border-zinc-100">
+      <table className="w-full text-xs">{children}</table>
+    </div>
+  ),
+  thead: ({ children }: { children?: React.ReactNode }) => (
+    <thead className="bg-zinc-50 text-zinc-500 font-semibold uppercase tracking-wider">{children}</thead>
+  ),
+  tbody: ({ children }: { children?: React.ReactNode }) => (
+    <tbody className="divide-y divide-zinc-50">{children}</tbody>
+  ),
+  th: ({ children }: { children?: React.ReactNode }) => <th className="px-3 py-2 text-left">{children}</th>,
+  td: ({ children }: { children?: React.ReactNode }) => <td className="px-3 py-2 text-zinc-600">{children}</td>,
+}
+
 function renderContent(text: string) {
-  return text.split("\n").map((line, i) => {
-    if (line === "") return <div key={i} className="h-2" />
-
-    const parts = line.split(/(\*\*[^*]+\*\*)/)
-    const rendered = parts.map((part, j) =>
-      part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={j} className="font-semibold text-zinc-900">
-          {part.slice(2, -2)}
-        </strong>
-      ) : (
-        part
-      )
-    )
-
-    if (line.startsWith("•")) {
-      return (
-        <p key={i} className="flex gap-2 text-zinc-600 text-sm leading-relaxed">
-          <span className="text-amber-500 mt-0.5 shrink-0">•</span>
-          <span>{rendered}</span>
-        </p>
-      )
-    }
-
-    return (
-      <p key={i} className="text-zinc-600 text-sm leading-relaxed">
-        {rendered}
-      </p>
-    )
-  })
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+      {text}
+    </ReactMarkdown>
+  )
 }
 
 export function OperationsAssistant() {
@@ -54,12 +85,15 @@ export function OperationsAssistant() {
   const [isLoading, setIsLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const messageIdRef = useRef(0)
+
+  const nextMessageId = (prefix: string) => `${prefix}-${++messageIdRef.current}`
 
   const sendMessage = async (question: string) => {
     const trimmed = question.trim()
     if (!trimmed || isLoading) return
 
-    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: trimmed }
+    const userMsg: Message = { id: nextMessageId("u"), role: "user", content: trimmed }
     setMessages((prev) => [...prev, userMsg])
     setInput("")
     setIsLoading(true)
@@ -75,18 +109,18 @@ export function OperationsAssistant() {
       if (!res.ok || data.error) {
         setMessages((prev) => [
           ...prev,
-          { id: `e-${Date.now()}`, role: "assistant", content: data.error ?? "Something went wrong.", isError: true },
+          { id: nextMessageId("e"), role: "assistant", content: data.error ?? "Something went wrong.", isError: true },
         ])
       } else {
         setMessages((prev) => [
           ...prev,
-          { id: `a-${Date.now()}`, role: "assistant", content: data.answer },
+          { id: nextMessageId("a"), role: "assistant", content: data.answer },
         ])
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        { id: `e-${Date.now()}`, role: "assistant", content: "Could not reach the AI service. Check your connection.", isError: true },
+        { id: nextMessageId("e"), role: "assistant", content: "Could not reach the AI service. Check your connection.", isError: true },
       ])
     } finally {
       setIsLoading(false)

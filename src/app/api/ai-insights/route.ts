@@ -1,64 +1,93 @@
 import { NextRequest, NextResponse } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
+import {
+  neighborhoods,
+  vendors,
+  customers,
+  subscriptions,
+  monthlyRevenue,
+  fulfillmentMetrics,
+  wasteVsRetail,
+} from "@/data/mock"
+import { formatCurrency, tierLabel } from "@/lib/utils"
 
 const client = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null
 const MAX_QUESTION_LENGTH = 2000
 
-const SYSTEM_PROMPT = `You are an operations assistant for Neighborhood Tasting Menu AI, a hyper-local NYC food subscription platform. You have access to real-time platform data below. Answer questions concisely and provide actionable business recommendations.
+// Built from the same mock data that powers the dashboard, so the assistant's
+// answers stay consistent with what's rendered on the Vendors/Customers/Subscriptions pages.
+function buildSystemPrompt(): string {
+  const neighborhoodMap = Object.fromEntries(neighborhoods.map((n) => [n.id, n]))
+  const customerMap = Object.fromEntries(customers.map((c) => [c.id, c]))
+
+  const neighborhoodLines = neighborhoods
+    .map((n) => `- ${n.name} (${n.borough}): ${n.id}`)
+    .join("\n")
+
+  const vendorLines = vendors
+    .map((v) => {
+      const hood = neighborhoodMap[v.neighborhood_id]?.name ?? "—"
+      return `- ${v.name} | ${hood} | ${v.category} | ★${v.rating.toFixed(1)} | ${v.active ? "active" : "INACTIVE"}`
+    })
+    .join("\n")
+
+  const activeSubCount = subscriptions.filter((s) => s.status === "active").length
+  const subscriptionLines = subscriptions
+    .map((s) => {
+      const customer = customerMap[s.customer_id]
+      const hood = customer ? neighborhoodMap[customer.neighborhood_id]?.name : undefined
+      const flag = s.status === "active" ? "" : ` — ${s.status.toUpperCase()}`
+      return `- ${customer?.name ?? "Unknown"} | ${hood ?? "—"} | ${tierLabel(s.tier)} | ${formatCurrency(s.price)}/${s.frequency}${flag}`
+    })
+    .join("\n")
+
+  const revenueLines = monthlyRevenue
+    .map(
+      (m) =>
+        `- ${m.month}: East Village ${formatCurrency(m.eastVillage)} | Bed-Stuy ${formatCurrency(m.bedStuy)} | Astoria ${formatCurrency(m.astoria)} | Total ${formatCurrency(m.total)}`
+    )
+    .join("\n")
+
+  const fulfillmentLines = fulfillmentMetrics
+    .map(
+      (f) =>
+        `- ${f.neighborhood}: ${f.fulfillmentRate}% fulfillment | ${f.onTimeRate}% on-time | ${f.wastePercent}% food waste | ${f.avgItemsPerBox} avg items/box`
+    )
+    .join("\n")
+
+  const wasteLines = wasteVsRetail
+    .map((w) => `${w.month}: platform ${w.platform}% vs. retail ${w.traditional}%`)
+    .join(" | ")
+
+  return `You are an operations assistant for Neighborhood Tasting Menu AI, a hyper-local NYC food subscription platform. You have access to real-time platform data below. Answer questions concisely and provide actionable business recommendations.
 
 == PLATFORM DATA ==
 
 NEIGHBORHOODS:
-- East Village (Manhattan): nbh-001
-- Bed-Stuy (Brooklyn): nbh-002
-- Astoria (Queens): nbh-003
+${neighborhoodLines}
 
 VENDORS:
-- Bien Cuit | East Village | bakery | ★4.9 | active | 48 orders
-- Fleisher's Craft Butchery | East Village | butcher | ★4.8 | active | 41 orders
-- Crown Finish Caves | Bed-Stuy | cheese | ★4.7 | active | 35 orders
-- Stinky Bklyn | Bed-Stuy | cheese | ★4.6 | active | 29 orders
-- Phillips Farms Stand | Astoria | produce | ★4.5 | active | 31 orders
-- Astoria Seafood | Astoria | seafood | ★4.8 | INACTIVE | 22 orders
+${vendorLines}
 
-CUSTOMERS (10 total):
-- Maya Torres | East Village | connoisseur | active
-- James Okafor | East Village | regular | active
-- Priya Nair | Bed-Stuy | explorer | active
-- Leo Vasquez | Bed-Stuy | connoisseur | active
-- Simone Park | Astoria | regular | PAUSED subscription
-- Omar Khalil | Astoria | explorer | active
-- Dana Reeves | East Village | regular | active
-- Tasha Williams | Bed-Stuy | explorer | active
-- Finn Larsen | Astoria | connoisseur | active
-- Aisha Grant | Bed-Stuy | regular | CANCELLED subscription
-
-SUBSCRIPTIONS:
-- Connoisseur: $120/week (Maya Torres, Leo Vasquez, Finn Larsen — all weekly)
-- Regular: $65/biweekly or weekly (James Okafor biweekly, Dana Reeves weekly, Simone Park biweekly PAUSED, Aisha Grant biweekly CANCELLED)
-- Explorer: $35/month (Priya Nair, Omar Khalil, Tasha Williams — all monthly)
+SUBSCRIPTIONS (${subscriptions.length} total, ${activeSubCount} active):
+${subscriptionLines}
 
 MONTHLY REVENUE (Jan–Jun 2024):
-- Jan: East Village $1,800 | Bed-Stuy $1,100 | Astoria $680 | Total $3,580
-- Feb: East Village $2,100 | Bed-Stuy $1,350 | Astoria $820 | Total $4,270
-- Mar: East Village $2,450 | Bed-Stuy $1,600 | Astoria $1,050 | Total $5,100
-- Apr: East Village $2,800 | Bed-Stuy $1,900 | Astoria $1,280 | Total $5,980
-- May: East Village $3,200 | Bed-Stuy $2,200 | Astoria $1,520 | Total $6,920
-- Jun: East Village $3,540 | Bed-Stuy $2,490 | Astoria $1,740 | Total $7,770
+${revenueLines}
 
 FULFILLMENT METRICS:
-- East Village: 97% fulfillment | 94% on-time | 3.1% food waste | 5.2 avg items/box
-- Bed-Stuy: 95% fulfillment | 91% on-time | 4.4% food waste | 4.8 avg items/box
-- Astoria: 93% fulfillment | 88% on-time | 5.2% food waste | 4.5 avg items/box
+${fulfillmentLines}
 
-FOOD WASTE vs. TRADITIONAL RETAIL (platform avg 4.2% vs ~30% retail):
-Jan: 5.1% vs 31% | Feb: 4.8% vs 30.5% | Mar: 4.5% vs 30.2% | Apr: 4.3% vs 29.8% | May: 4.1% vs 29.5% | Jun: 4.2% vs 29.3%
+FOOD WASTE vs. TRADITIONAL RETAIL (% by month):
+${wasteLines}
 
 == FORMATTING GUIDELINES ==
-- Use **bold** for key names, numbers, and section headers
-- Use bullet points (•) for lists
-- Keep responses focused and under 400 words unless the question genuinely requires depth
-- Lead with the most actionable insight`
+- Respond in clean, standard Markdown: "##" for section headers, "**bold**" for key names and numbers, "-" for bullet lists, and Markdown tables where a table is genuinely clearer than prose.
+- Keep responses focused and under 400 words unless the question genuinely requires depth.
+- Lead with the most actionable insight.`
+}
+
+const SYSTEM_PROMPT = buildSystemPrompt()
 
 export async function POST(req: NextRequest) {
   if (!client) {
