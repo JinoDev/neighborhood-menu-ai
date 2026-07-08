@@ -46,7 +46,7 @@ export default function LandingPage() {
       <nav className="shrink-0 border-b border-zinc-100">
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 pt-5 pb-2.5 max-w-7xl mx-auto w-full">
           <Link href="/" className="min-w-0 hover:opacity-80 transition-opacity">
-            <span className="text-amber-600 text-xs font-semibold uppercase tracking-widest">Neighborhood</span>
+            <span className="text-amber-600 text-s font-semibold uppercase tracking-widest">Neighborhood</span>
             <span className="text-zinc-900 font-bold text-base ml-1.5">Tasting Menu AI</span>
           </Link>
           <Link
@@ -80,7 +80,7 @@ export default function LandingPage() {
               <span className="text-amber-500">streamlined by AI</span>
             </h1>
             <p className="text-base sm:text-lg text-zinc-500 max-w-md mb-6 leading-relaxed">
-              Connect vendors and subscribers, track performance by neighborhood, and get AI-driven insights — all in one dashboard.
+              Connect vendors and subscribers, track performance by neighborhood, and get AI-driven insights - all in one dashboard.
             </p>
             <div className="flex flex-wrap items-center gap-3 mb-7">
               <Link
