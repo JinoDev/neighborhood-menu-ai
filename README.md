@@ -1,5 +1,9 @@
 # Saffron *(Working Title)*
 
+## Live Demo
+
+🌐 https://neighborhood-menu-ai.vercel.app
+
 **An AI-powered operations platform for hyper-local food subscription businesses.**
 
 Neighborhood Tasting Menu AI is a full-stack operations dashboard for an NYC subscription box service that curates weekly boxes from local bakeries, butchers, cheesemongers, and farms. Built to explore AI-assisted operations for local food marketplaces.
