@@ -87,15 +87,21 @@ src/
 
 ## Screenshots
 
-*Screenshots coming soon — drop images into `docs/screenshots/` and update the links below.*
+### Landing Page
 
-| Landing Page | Dashboard |
-|---|---|
-| `docs/screenshots/landing.png` | `docs/screenshots/dashboard.png` |
+![Landing Page](docs/screenshots/landing.png)
 
-| Subscriptions | AI Assistant |
-|---|---|
-| `docs/screenshots/subscriptions.png` | `docs/screenshots/ai-assistant.png` |
+### Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Analytics
+
+![Analytics](docs/screenshots/analytics.png)
+
+### AI Operations Assistant
+
+![AI Assistant](docs/screenshots/ai.png)
 
 ## Local Setup
 
