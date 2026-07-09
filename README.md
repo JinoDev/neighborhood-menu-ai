@@ -88,19 +88,15 @@ src/
 ## Screenshots
 
 ### Landing Page
-
 ![Landing Page](docs/screenshots/landing.png)
 
 ### Dashboard
-
 ![Dashboard](docs/screenshots/dashboard.png)
 
 ### Analytics
-
 ![Analytics](docs/screenshots/analytics.png)
 
 ### AI Operations Assistant
-
 ![AI Assistant](docs/screenshots/ai.png)
 
 ## Local Setup
